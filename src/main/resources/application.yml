@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: organization-command
+
+  cloud:
+    discovery:
+      enabled: true
+    config:
+      discovery:
+        service-id: config-server
+
+  data:
+    mongodb:
+      uri: ${MONGO_URI:mongodb+srv://${MONGO_USER:user}:${MONGO_PASSWORD:pass}@${MONGO_HOST:localhost:27019}/${MONGO_DB_NAME:organization}?retryWrites=true&w=majority}
+      database: organization
+
+  kafka:
+    admin:
+      client-id: organization-service
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      client-id: organization-producer
+    properties:
+      security:
+        protocol: SASL_SSL
+      sasl:
+        mechanism: PLAIN
+        jaas:
+          config: org.apache.kafka.common.security.plain.PlainLoginModule   required username='${JAAS_USERNAME:jaas}'   password='${JAAS_PASSWORD:jaas}';
+      bootstrap:
+        servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+server:
+  port: ${SERVER_PORT:0}
+  error:
+    include-message: always
+
+
+eureka:
+  client:
+    service-url:
+      default-zone: ${EUREKA_URI:https://localhost:8761/eureka/}
+  instance:
+    instance-id: ${spring.application.name}:${INSTANCE_ID:${random.value}}
